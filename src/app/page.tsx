@@ -1,42 +1,44 @@
 'use client';
 
-import styles from "./page.module.css";
-import Link from "next/link";
+// import styles from "./page.module.css";
+// import Link from "next/link";
 import React from 'react';
 import {
-  Bar, Note, BarGroup, MetronomeSetting,
+  MetronomeSetting,
 } from '@/models';
+import {buildAudio} from "@/app/audio";
 
 const DefAULT_METRONOME: MetronomeSetting = {
   name: 'for Armenian Dances part 1',
-  unit: 1,
+  unit: 2,
   bpm: 120,
   bars: [
     {
       beat: 5,
       subdivision: 8,
       notes: [
-        {duration: 1, isAccent: true, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
-        {duration: 1, isAccent: true, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: true, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: true, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
       ],
     },
     {
       beat: 5,
       subdivision: 8,
       notes: [
-        {duration: 1, isAccent: true, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
-        {duration: 1, isAccent: true, isRest: false},
-        {duration: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: true, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
+        {quaverCount: 1, isAccent: true, isRest: false},
+        {quaverCount: 1, isAccent: false, isRest: false},
       ],
     },
   ],
 }
 
+let audioContext: AudioContext | null = null;
 
 export default function Home() {
   const [metronome, ] = React.useState<MetronomeSetting>(DefAULT_METRONOME);
@@ -44,11 +46,22 @@ export default function Home() {
   React.useEffect(() => {
   }, []);
 
-  function start() {
+  async function start() {
     setPlaying(true);
+    const audioBuffer = await buildAudio(metronome);
+    audioContext = new AudioContext();
+    const sourceNode = audioContext.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+    sourceNode.connect(audioContext.destination);
+    sourceNode.loop = true;
+    sourceNode.start();
   }
-  function stop() {
+  async function stop() {
     setPlaying(false);
+    if(audioContext) {
+      await audioContext.close();
+    }
+    audioContext = null;
   }
 
   const metronomeStr = JSON.stringify(metronome, null, 2);

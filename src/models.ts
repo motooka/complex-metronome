@@ -1,5 +1,5 @@
 export interface Note {
-  duration: number; // 1 = quaver
+  quaverCount: number; // 1 = quaver, 2=crotchet, 4=minim
   isRest: boolean;
   isAccent: boolean;
 }
@@ -28,14 +28,14 @@ export function isNote(obj: any): obj is Note {
     return false;
   }
   if(
-    !obj.hasOwnProperty('duration')
+    !obj.hasOwnProperty('quaverCount')
     || !obj.hasOwnProperty('isRest')
     || !obj.hasOwnProperty('isAccent')
   ) {
     return false;
   }
   if(
-    typeof obj.duration !== 'number'
+    typeof obj.quaverCount !== 'number'
     || typeof obj.isRest !== 'boolean'
     || typeof obj.isAccent !== 'boolean'
   ) {
